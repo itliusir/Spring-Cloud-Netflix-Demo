@@ -1,0 +1,26 @@
+server:
+  port: 9100
+
+spring:
+  application:
+    name: hystrix-dashboard-turbine
+management:
+  security:
+    enabled: false
+info:
+    app:
+        name: hystrix-dashboard-turbine
+        version: 1.0
+eureka:
+    instance:
+        statusPageUrlPath: /hystrix
+        healthCheckUrlPath: /health
+        prefer-ip-address: true
+        ip-address: 127.0.0.1
+    client:
+        serviceUrl:
+            defaultZone: http://127.0.0.1:8761/eureka/
+        registry-fetch-interval-seconds: 30
+turbine:
+  app-config: service-consumer,service-provider
+  cluster-name-expression: new String("default")

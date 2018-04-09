@@ -1,0 +1,52 @@
+server:
+  port: 9099
+spring:
+  application:
+    name: zuul-server
+management:
+  security:
+    enabled: false
+info:
+    app:
+        name: 网关服务
+        version: 1.0
+
+zuul:
+  ignored-services: "*"
+  sensitive-headers:
+  prefix: /api  # 请求前缀
+  routes:
+    consumer:
+      path: /consumer/**
+      serviceId: service-consumer
+
+    provider:
+      path: /provider/**
+      serviceId: service-provider
+  retryable: true
+
+eureka:
+    instance:
+        statusPageUrlPath: /routes
+        healthCheckUrlPath: /health
+        prefer-ip-address: true
+        ip-address: 127.0.0.1
+    client:
+        serviceUrl:
+            defaultZone: http://127.0.0.1:8761/eureka/
+        registry-fetch-interval-seconds: 30
+hystrix:
+    command:
+        default:
+            execution:
+                isolation:
+                    thread:
+                        timeoutInMilliseconds: 5000
+                    strategy: THREAD
+ribbon:
+    ReadTimeout: 20000
+    ConnectTimeout: 20000
+    MaxAutoRetries: 0
+    MaxAutoRetriesNextServer: 1
+    MaxTotalHttpConnections: 2000
+    MaxConnectionsPerHost: 1000

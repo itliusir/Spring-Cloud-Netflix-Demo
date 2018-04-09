@@ -1,0 +1,14 @@
+spring:
+    application:
+        name: ms-platform-center
+
+server:
+    port: 8761 #启动端口
+
+eureka:
+    client:
+        registerWithEureka: false  #false:不作为一个客户端注册到注册中心
+        fetchRegistry: false
+    server:
+      enable-self-preservation: false
+      eviction-interval-timer-in-ms: 4000

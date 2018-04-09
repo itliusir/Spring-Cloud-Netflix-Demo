@@ -1,0 +1,216 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+		 xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+	<parent>
+		<artifactId>ms-base-security</artifactId>
+		<groupId>com.yss.ms</groupId>
+		<version>1.0-SNAPSHOT</version>
+	</parent>
+	<modelVersion>4.0.0</modelVersion>
+
+	<artifactId>ms-sidecar</artifactId>
+
+	<properties>
+		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+		<project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
+		<java.version>1.8</java.version>
+	</properties>
+
+	<dependencies>
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-actuator</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-web</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-test</artifactId>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework.cloud</groupId>
+			<artifactId>spring-cloud-starter-eureka</artifactId>
+		</dependency>
+
+		<dependency>
+			<groupId>org.springframework.cloud</groupId>
+			<artifactId>spring-cloud-starter-feign</artifactId>
+		</dependency>
+
+		<dependency>
+			<groupId>org.springframework.cloud</groupId>
+			<artifactId>spring-cloud-starter-hystrix</artifactId>
+		</dependency>
+
+		<dependency>
+			<groupId>org.springframework.cloud</groupId>
+			<artifactId>spring-cloud-netflix-sidecar</artifactId>
+		</dependency>
+
+	</dependencies>
+
+	<build>
+		<plugins>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-compiler-plugin</artifactId>
+				<configuration>
+					<source>1.8</source>
+					<target>1.8</target>
+					<encoding>UTF-8</encoding>
+				</configuration>
+			</plugin>
+			<plugin>
+				<groupId>org.springframework.boot</groupId>
+				<artifactId>spring-boot-maven-plugin</artifactId>
+			</plugin>
+		</plugins>
+	</build>
+
+	<packaging>war</packaging>
+	<profiles>
+		<profile>
+			<id>window</id>
+			<activation>
+				<activeByDefault>true</activeByDefault>
+			</activation>
+		</profile>
+		<profile>
+			<id>unix</id>
+			<build>
+				<plugins>
+					<plugin>
+						<artifactId>maven-antrun-plugin</artifactId>
+						<executions>
+							<execution>
+								<id>package</id>
+								<phase>package</phase>
+								<goals>
+									<goal>run</goal>
+								</goals>
+								<configuration>
+									<tasks>
+										<property name="ant.home" value="/setup/tools/apache-ant-1.10.1" />
+										<property name="dockerignore.file" value="${basedir}/.dockerignore" />
+										<property name="prepare.file" value="${basedir}/PreBuild.sh" />
+										<property name="dockerbulid.file" value="${basedir}/DockerBuild.sh" />
+										<property name="dockerrun.file" value="${basedir}/DockerRun.sh" />
+										<copy todir="${basedir}/" overwrite="true">
+											<fileset dir="${basedir}/src/main/docker/">
+												<include name="*" />
+											</fileset>
+											<fileset dir="${project.build.directory}/">
+												<include name="*.jar" />
+												<include name="*.war" />
+											</fileset>
+										</copy>
+										<echo message="prepare package chmod a+x....." />
+										<chmod perm="a+x">
+											<fileset dir="${basedir}/">
+												<include name="**/*.sh" />
+												<include name="**/*.bat" />
+											</fileset>
+										</chmod>
+										<exec command="sed -i 's/\r//' ${dockerignore.file}" />
+										<exec command="sed -i 's/\r//' ${prepare.file}" />
+										<exec command="sed -i 's/\r//' ${dockerbulid.file}" />
+										<exec command="sed -i 's/\r//' ${dockerrun.file}" />
+										<!-- docker clean -->
+										<echo message=" step 1 docker build sh ${prepare.file}" />
+										<exec executable="${prepare.file}" />
+										<!-- docker build -->
+										<echo message=" step 2 docker build sh ${dockerbulid.file}" />
+										<exec executable="${dockerbulid.file}" />
+									</tasks>
+								</configuration>
+							</execution>
+							<execution>
+								<id>pre-integration-test</id>
+								<phase>pre-integration-test</phase>
+								<goals>
+									<goal>run</goal>
+								</goals>
+								<configuration>
+									<tasks>
+										<property name="dockerrun.file" value="${basedir}/DockerRun.sh" />
+										<echo message="step 3 docker run sh ${dockerrun.file}" />
+										<exec executable="${dockerrun.file}" />
+									</tasks>
+								</configuration>
+							</execution>
+						</executions>
+					</plugin>
+				</plugins>
+			</build>
+		</profile>
+		<profile>
+			<id>cobertura</id>
+			<build>
+				<plugins>
+					<plugin>
+						<groupId>org.codehaus.mojo</groupId>
+						<artifactId>cobertura-maven-plugin</artifactId>
+						<version>2.7</version>
+						<configuration>
+							<formats>
+								<format>html</format>
+								<format>xml</format>
+							</formats>
+						</configuration>
+					</plugin>
+				</plugins>
+			</build>
+		</profile>
+		<profile>
+			<id>findbugs</id>
+			<build>
+				<plugins>
+					<plugin>
+						<groupId>org.codehaus.mojo</groupId>
+						<artifactId>findbugs-maven-plugin</artifactId>
+						<version>3.0.5</version>
+						<configuration>
+							<!-- <configLocation>${basedir}/springside-findbugs.xml</configLocation> -->
+							<threshold>High</threshold>
+							<effort>Default</effort>
+							<findbugsXmlOutput>true</findbugsXmlOutput>
+							<!-- <findbugsXmlWithMessages>true</findbugsXmlWithMessages>  -->
+							<!-- findbugs xml输出路径 -->
+							<findbugsXmlOutputDirectory>target/site/findbugs/</findbugsXmlOutputDirectory>
+						</configuration>
+					</plugin>
+				</plugins>
+			</build>
+		</profile>
+		<profile>
+			<id>jmeter</id>
+			<build>
+				<plugins>
+					<plugin>
+						<groupId>com.lazerycode.jmeter</groupId>
+						<artifactId>jmeter-maven-plugin</artifactId>
+						<version>2.2.0</version>
+						<executions>
+							<execution>
+								<id>jmeter-tests</id>
+								<phase>verify</phase>
+								<goals>
+									<goal>jmeter</goal>
+								</goals>
+								<configuration>
+									<testFilesIncluded>
+										<jMeterTestFile>agent.jmx</jMeterTestFile>
+									</testFilesIncluded>
+								</configuration>
+							</execution>
+						</executions>
+					</plugin>
+				</plugins>
+			</build>
+		</profile>
+	</profiles>
+
+</project>

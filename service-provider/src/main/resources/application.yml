@@ -1,0 +1,41 @@
+server:
+  port: 9091
+spring:
+  application:
+    name: service-provider
+
+management:
+  security:
+    enabled: false
+
+info:
+    app:
+        name: 服务提供方
+        version: 1.0
+
+eureka:
+    instance:
+        statusPageUrlPath: /user
+        healthCheckUrlPath: /health
+        prefer-ip-address: true
+        ip-address: 127.0.0.1
+    client:
+        serviceUrl:
+            defaultZone: http://127.0.0.1:8761/eureka/
+        registry-fetch-interval-seconds: 30
+
+hystrix:
+    command:
+        default:
+            execution:
+                isolation:
+                    thread:
+                        timeoutInMilliseconds: 20000
+                    strategy: THREAD
+ribbon:
+    ReadTimeout: 20000
+    ConnectTimeout: 20000
+    MaxAutoRetries: 0
+    MaxAutoRetriesNextServer: 1
+    MaxTotalHttpConnections: 2000
+    MaxConnectionsPerHost: 1000
