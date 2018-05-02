@@ -1,8 +1,8 @@
 # `Spring Cloud Netflix OSS`
 
-## Spring Cloud Eureka
-
 提供了对`Netflix`开源项目的集成，使我们可以以Spring Boot编程风格使用`Netflix`旗下相关框架，只需要在程序里添加注解，就可以使用成熟的`Netflix`组件(`Eureka`、`Hystrix`、`Zuul`、`Ribbon`、`Sidecar`)
+
+## Spring Cloud Eureka
 
 ### Eureka客户端
 
