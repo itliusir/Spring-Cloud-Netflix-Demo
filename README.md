@@ -36,7 +36,7 @@
 
 ### Eureka服务端
 
-![img](http://ok0qzthrb.bkt.clouddn.com/Eureka.png)
+![img](http://qiniu.itliusir.com/Eureka.png)
 
 - 注册中心对比
 
